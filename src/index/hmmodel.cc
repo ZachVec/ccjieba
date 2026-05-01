@@ -8,6 +8,10 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <system_error>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include "utils/io.hh"
 #include "utils/str_utils.hh"

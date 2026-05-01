@@ -1,6 +1,8 @@
 #include "utils/io.hh"
 
+#include <cstddef>
 #include <cstring>
+#include <type_traits>
 
 namespace ccjieba {
 

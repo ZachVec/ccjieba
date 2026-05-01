@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <iterator>
 #include <string_view>
 #include <vector>
 
@@ -18,14 +17,14 @@ auto FullSegment::operator()(std::u32string_view str) const -> std::vector<std::
 
   size_t unprocessed_index = 0;
   std::vector<std::u32string_view> ret;
-  for (auto node = graph.begin(); node != graph.end(); ++node) {
-    auto i = static_cast<size_t>(std::distance(graph.begin(), node));
-    for (const auto &[j, _] : *node) {
+  ret.reserve(str.size() / 2);
+  for (size_t i = 0; i < graph.size(); ++i) {
+    for (const auto &[j, _] : graph[i]) {
       size_t length = j - i + 1;
       if (length >= 2) {
         ret.push_back(str.substr(i, length));
         unprocessed_index = std::max(unprocessed_index, j + 1);
-      } else if (node->size() == 1 and i >= unprocessed_index) {
+      } else if (graph[i].size() == 1 and i >= unprocessed_index) {
         ret.push_back(str.substr(i, 1));
         unprocessed_index = std::max(unprocessed_index, j + 1);
       }

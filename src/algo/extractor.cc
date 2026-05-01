@@ -34,7 +34,7 @@ auto KeywordExtractor::operator()(const std::vector<std::string> &segments, size
     -> std::vector<Keyword> {
   std::unordered_map<std::string_view, std::tuple<size_t, std::vector<size_t>>> keywords;
   size_t offset = 0;
-  for (auto &segment : segments) {
+  for (const auto &segment : segments) {
     if (is_one_letter_word(segment) or stop_words_[segment]) {
       offset += segment.size();
       continue;

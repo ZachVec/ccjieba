@@ -76,7 +76,8 @@ auto Trie::search(std::u32string_view str, size_t max_len) const -> Graph {
     }
     graph.add_edge(i, i, du);
 
-    for (size_t j = i + 1; j < size && (j - i + 1) <= max_len; ++j) {
+    size_t max_j = std::min(size, i + max_len);
+    for (size_t j = i + 1; j < max_j; ++j) {
       if (next == nullptr) {
         break;
       }

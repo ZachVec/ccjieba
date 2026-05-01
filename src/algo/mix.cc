@@ -21,7 +21,7 @@ auto MixSegment::operator()(std::u32string_view str) const -> std::vector<std::u
 
 auto mix(std::u32string_view str, const Segments &segs, const HMModel &model, const Trie &trie)
     -> std::vector<std::u32string_view> {
-  HMMSegment hmm(model);
+  const HMMSegment hmm(model);
   std::vector<std::u32string_view> ret;
   ret.reserve(str.size());
   for (size_t u = 0, v = 0; u < segs.size(); u = v) {

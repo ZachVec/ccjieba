@@ -2,8 +2,10 @@
 
 #include <cstddef>
 #include <string_view>
+#include <vector>
 
 #include "algo/internal.hh"
+#include "index/trie.hh"
 
 namespace ccjieba {
 
@@ -23,7 +25,7 @@ auto MPSegment::operator()(std::u32string_view str) const -> std::vector<std::u3
 }
 
 auto mp(const Graph &graph, double min_weight) -> Segments {
-  auto value = Segment(std::u32string_view::npos, -3.14e+100, nullptr);
+  const auto value = Segment(std::u32string_view::npos, -3.14e+100, nullptr);
   Segments segments(graph.size(), value);
   for (ptrdiff_t u = static_cast<ptrdiff_t>(graph.size()) - 1; u >= 0; --u) {
     auto &[indice_of_max, weight_of_max, info_of_max] = segments[u];

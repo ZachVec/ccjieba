@@ -107,6 +107,4 @@ class bistream {  // NOLINT(readability-identifier-naming)
   }
 };
 
-// template <typename T>
-
 }  // namespace ccjieba

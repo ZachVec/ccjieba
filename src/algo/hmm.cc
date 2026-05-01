@@ -14,9 +14,10 @@ HMMSegment::HMMSegment(const HMModel &model) : viterbi_(model) {}
 auto HMMSegment::operator()(std::u32string_view str) const -> std::vector<std::u32string_view> {
   size_t u = 0;
   size_t v = 0;
+  const size_t n = str.size();
   std::vector<std::u32string_view> segs;
-  while (v < str.size()) {
-    if (v < str.size() and str[v] >= 0x80) {
+  while (v < n) {
+    if (str[v] >= 0x80) {
       ++v;
       continue;
     }
@@ -27,11 +28,11 @@ auto HMMSegment::operator()(std::u32string_view str) const -> std::vector<std::u
     u = v;
     v = v + 1;
     if (std::isalpha(static_cast<int>(str[u]))) {
-      while (v < str.size() and std::isalnum(static_cast<int>(str[v]))) {
+      while (v < n and std::isalnum(static_cast<int>(str[v]))) {
         ++v;
       }
     } else if (std::isdigit(static_cast<int>(str[u]))) {
-      while (v < str.size() and (std::isdigit(static_cast<int>(str[v])) or str[v] == U'.')) {
+      while (v < n and (std::isdigit(static_cast<int>(str[v])) or str[v] == U'.')) {
         ++v;
       }
     }

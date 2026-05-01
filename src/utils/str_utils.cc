@@ -1,6 +1,5 @@
 #include "utils/str_utils.hh"
 
-#include <cassert>
 #include <cstddef>
 #include <string>
 #include <string_view>

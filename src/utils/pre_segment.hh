@@ -4,7 +4,6 @@
 #include <iterator>
 #include <string>
 #include <string_view>
-#include <utility>
 
 namespace ccjieba {
 
@@ -12,8 +11,7 @@ class PreSegment {
   std::u32string symbols_;
   std::u32string_view sentence_;
   friend class PreSegmenter;
-  PreSegment(std::u32string_view symbols, std::u32string_view sentence)
-    : symbols_(std::move(symbols)), sentence_(std::move(sentence)) {}
+  PreSegment(std::u32string_view symbols, std::u32string_view sentence) : symbols_(symbols), sentence_(sentence) {}
 
  public:
   class const_iterator {  // NOLINT(readability-identifier-naming)

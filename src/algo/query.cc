@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "algo/internal.hh"
+#include "index/trie.hh"
 #include "utils/dag.hh"
 
 namespace ccjieba {
@@ -17,9 +18,9 @@ QuerySegment::QuerySegment(const HMModel &model, const Trie &trie, size_t max_wo
 }
 
 auto QuerySegment::operator()(std::u32string_view str) const -> std::vector<std::u32string_view> {
-  DiGraph<const Info *> graph = trie_.search(str, max_word_length_);
+  const Graph graph = trie_.search(str, max_word_length_);
   std::vector<std::u32string_view> segments = mix(str, mp(graph, trie_.minimum_weight()), hmm_, trie_);
-  auto collect = [&graph, this, &str](size_t u, size_t max_length, std::vector<std::u32string_view> &ret) {
+  auto collect = [&graph, this, &str](size_t u, size_t max_length, std::vector<std::u32string_view> &ret) -> void {
     size_t i = 0;  // index of lengths
     size_t j = 1;  // index of node
     while (i < lengths_.size() and lengths_[i] <= max_length and j < graph[u].size()) {
