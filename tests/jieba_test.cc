@@ -2,11 +2,13 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <fstream>
 #include <ostream>
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "algo/full.hh"
@@ -14,6 +16,7 @@
 #include "algo/mix.hh"
 #include "algo/mp.hh"
 #include "algo/query.hh"
+#include "keyword.hh"
 
 using std::operator""sv;
 
@@ -156,6 +159,27 @@ TEST_F(JiebaTest, TagWordTest) {
 
   // Unknown Chinese word
   EXPECT_EQ(jieba.tag_word("龘龘"sv), "x");
+}
+
+TEST_F(JiebaTest, UserDictTagOverrideTest) {
+  auto find_tag = [](const std::vector<std::pair<std::string, std::string_view>> &tags,
+                     std::string_view word) -> std::string_view {
+    for (const auto &[w, t] : tags) {
+      if (w == word) return t;
+    }
+    return {};
+  };
+
+  auto before = jieba.tag_sentence("蓝翔技工拖拉机学院"sv);
+  auto tag_before = find_tag(before, "蓝翔");
+  ASSERT_FALSE(tag_before.empty()) << "蓝翔 not found in tag output before user dict";
+  EXPECT_EQ(tag_before, "x");
+
+  ASSERT_FALSE((std::ifstream(TEST_DATA_ROOT "/user.dict.utf8") >> jieba.trie_.user()).bad());
+  auto after = jieba.tag_sentence("蓝翔技工拖拉机学院"sv);
+  auto tag_after = find_tag(after, "蓝翔");
+  ASSERT_FALSE(tag_after.empty()) << "蓝翔 not found in tag output after user dict";
+  EXPECT_EQ(tag_after, "nz");
 }
 
 }  // namespace ccjieba

@@ -27,13 +27,16 @@ auto HMMSegment::operator()(std::u32string_view str) const -> std::vector<std::u
     }
     u = v;
     v = v + 1;
-    if (std::isalpha(static_cast<int>(str[u]))) {
+    if (std::isalnum(static_cast<int>(str[u]))) {
       while (v < n and std::isalnum(static_cast<int>(str[v]))) {
         ++v;
       }
-    } else if (std::isdigit(static_cast<int>(str[u]))) {
-      while (v < n and (std::isdigit(static_cast<int>(str[v])) or str[v] == U'.')) {
-        ++v;
+      // Optional decimal suffix: consume ".digits" (e.g. "3.14", "v1.2")
+      if (v + 1 < n and str[v] == U'.' and std::isdigit(static_cast<int>(str[v + 1]))) {
+        v += 2;  // skip dot and first digit (already checked)
+        while (v < n and std::isdigit(static_cast<int>(str[v]))) {
+          ++v;
+        }
       }
     }
     segs.push_back(str.substr(u, v - u));
