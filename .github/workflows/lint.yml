@@ -1,0 +1,47 @@
+name: Lint
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'demo.cc'
+      - 'CMakeLists.txt'
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'demo.cc'
+      - 'CMakeLists.txt'
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get install -y clang-format
+
+      - name: Check formatting
+        run: |
+          find src/ tests/ -name '*.cc' -o -name '*.hh' | sort | \
+          xargs clang-format --dry-run --Werror
+
+  tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get install -y cmake clang-tidy
+
+      - name: Configure and build
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=OFF
+          cmake --build build --target ccjieba
+
+      - name: Run clang-tidy
+        run: run-clang-tidy -p build -warnings-as-errors='*'

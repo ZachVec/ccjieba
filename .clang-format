@@ -1,0 +1,16 @@
+BasedOnStyle: Google
+DerivePointerAlignment: false
+PointerAlignment: Right
+ColumnLimit: 120
+InsertNewlineAtEOF: true
+
+IncludeBlocks: Regroup
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 2
+BinPackArguments: false
+BreakConstructorInitializers: BeforeComma
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortLambdasOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+InsertBraces: true

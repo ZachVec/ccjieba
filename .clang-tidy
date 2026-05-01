@@ -1,0 +1,75 @@
+---
+# clang-tidy configuration for ccjieba
+# Usage:
+#   cmake -B build && cmake --build build    # generates build/compile_commands.json
+#   clang-tidy -p build src/algo/mp.cc       # check single file
+#   run-clang-tidy -p build                  # check all source files
+#   clang-tidy -p build -fix src/algo/mp.cc  # auto-fix single file
+---
+Checks: >
+  -*,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  performance-*,
+  modernize-use-nullptr,
+  modernize-use-override,
+  modernize-use-equals-default,
+  modernize-use-emplace,
+  modernize-use-using,
+  modernize-make-shared,
+  modernize-make-unique,
+  modernize-use-auto,
+  modernize-use-bool-literals,
+  modernize-loop-convert,
+  modernize-use-trailing-return-type,
+  readability-identifier-naming,
+  readability-container-size-empty,
+  readability-redundant-string-cstr,
+  readability-redundant-member-init,
+  readability-redundant-string-init,
+  readability-const-return-type,
+  cppcoreguidelines-no-malloc,
+  cppcoreguidelines-prefer-member-initializer,
+  misc-misleading-bidirectional,
+  misc-misleading-identifier,
+  misc-suspicious-semicolon,
+  misc-throw-by-value-catch-by-reference,
+  misc-uniqueptr-reset-release,
+
+WarningsAsErrors: ''
+
+HeaderFilterRegex: '\.(hh|cc)$'
+
+CheckOptions:
+  - key: performance-move-const-arg.CheckTriviallyCopyableMove
+    value: false
+
+  # Naming conventions — matched to existing codebase style
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.IgnoredRegexp
+    value: '^(bostream|bistream|const_iterator)$'
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: lower_case
+  - key: readability-identifier-naming.MethodCase
+    value: lower_case
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+  - key: readability-identifier-naming.LocalVariableCase
+    value: lower_case
+  - key: readability-identifier-naming.ParameterCase
+    value: lower_case
+  - key: readability-identifier-naming.PrivateMemberSuffix
+    value: '_'
+  - key: readability-identifier-naming.NamespaceCase
+    value: lower_case
+  - key: readability-identifier-naming.EnumConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.ConstexprVariableCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.TemplateParameterCase
+    value: CamelCase
+  # TypeAliasCase intentionally omitted — auto-fix renames declarations but
+  # not cross-file uses (STL convention names like value_type, iterator_category)
