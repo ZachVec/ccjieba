@@ -1,6 +1,7 @@
 .cache
 build
 docs/book/
+docs/doxygen/
 
 *.out
 compile_commands.json

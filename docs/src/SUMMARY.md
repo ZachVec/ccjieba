@@ -14,3 +14,4 @@
   - [QuerySegment](algorithms/query.md)
 - [Data Formats](data-formats.md)
 - [User Dictionary](user-dict.md)
+- [API Reference (Doxygen)](doxygen/html/index.html)

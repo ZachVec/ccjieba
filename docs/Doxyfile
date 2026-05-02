@@ -1,0 +1,29 @@
+PROJECT_NAME           = "CcJieba"
+PROJECT_BRIEF          = "C++ Chinese text segmentation library"
+OUTPUT_DIRECTORY       = doxygen
+INPUT                  = ../src \
+                         ../include
+RECURSIVE              = YES
+FILE_PATTERNS          = *.hh *.cc *.h
+EXCLUDE_PATTERNS       = */tests/* */build/* */deps/*
+EXCLUDE                = ../src/index
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+GENERATE_LATEX         = NO
+GENERATE_XML           = NO
+GENERATE_TREEVIEW      = YES
+DOT_IMAGE_FORMAT       = svg
+INTERACTIVE_SVG        = YES
+
+OPTIMIZE_OUTPUT_FOR_C  = NO
+CASE_SENSE_NAMES       = YES
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+SORT_MEMBER_DOCS       = YES
+SOURCE_BROWSER         = YES
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+
+QUIET                  = YES
+WARN_NO_PARAMDOC       = YES
