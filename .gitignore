@@ -1,5 +1,6 @@
 .cache
 build
+docs/book/
 
 *.out
 compile_commands.json

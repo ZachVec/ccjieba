@@ -1,0 +1,11 @@
+[book]
+title = "CcJieba"
+authors = ["ZachVec"]
+language = "en"
+
+[build]
+build-dir = "book"
+
+[output.html]
+git-repository-url = "https://github.com/ZachVec/ccjieba"
+edit-url-template = "https://github.com/ZachVec/ccjieba/edit/master/docs/src/{path}"
