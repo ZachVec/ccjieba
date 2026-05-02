@@ -1,3 +1,6 @@
+/// @file trie.hh
+/// @brief Unicode trie data structure mapping char32_t phrases to Info entries.
+
 #pragma once
 
 #include <cstddef>
@@ -19,13 +22,24 @@ namespace ccjieba {
 template <typename T>
 class DiGraph;
 
+/// @brief Value stored at each trie node: log-scaled word frequency and POS tag.
 struct Info {
-  double weight;
-  std::string tag;
+  double weight;  ///< Log-scaled word frequency relative to total corpus frequency.
+  std::string tag; ///< Part-of-speech tag (e.g. "n", "v", "a").
 };
 
 class UserTrie;
 
+/// @brief Unicode prefix trie (keyed by char32_t) for dictionary lookup and DAG construction.
+///
+/// Stores phrases with log-probability weights and POS tags. Supports:
+/// - Exact prefix match via match()
+/// - DAG-building search() for max-probability segmentation
+/// - DFS iteration over all entries via const_iterator
+/// - User-defined dictionary insertion via UserTrie
+///
+/// Weights are log-transformed during text deserialization so that path probabilities
+/// can be summed instead of multiplied.
 class Trie {
   using Graph = DiGraph<const Info *>;
   friend class UserTrie;
@@ -40,6 +54,7 @@ class Trie {
   friend auto operator<<(bostream &os, const Trie &trie) -> bostream &;
   friend auto operator>>(std::istream &is, UserTrie &&trie) -> std::istream &;
 
+  /// @brief Insert or update a phrase, returning a pointer to its Info.
   auto upsert(std::u32string_view phrase, Info info) -> Info *;
 
  public:
@@ -50,22 +65,34 @@ class Trie {
     , minimum_weight_(std::numeric_limits<double>::max())
     , maximum_weight_(std::numeric_limits<double>::min()) {}
 
+  /// @brief Exact prefix lookup. Returns null if no prefix of @p str is in the trie.
   auto match(std::u32string_view str) const -> const Info *;
 
+  /// @brief Build a DAG of all dictionary matches starting at each position.
+  /// @param str The input string.
+  /// @param max_len Maximum match length.
+  /// @return A DiGraph with an edge (i, j, Info*) for each match str[i..j].
   auto search(std::u32string_view str, size_t max_len) const -> Graph;
 
+  /// @brief Check whether a character is the start of any user-dictionary entry.
   inline auto in_userdict(char32_t ch) const -> bool { return user_char_.find(ch) != user_char_.end(); }
 
+  /// @brief Minimum log-weight among all entries (used as fallback for unknown words).
   inline auto minimum_weight() const -> double { return minimum_weight_; }
 
+  /// @brief Maximum log-weight among all entries.
   inline auto maximum_weight() const -> double { return maximum_weight_; }
 
+  /// @brief Length of the longest phrase in the trie.
   inline auto max_word_length() const -> size_t { return max_word_length_; }
 
+  /// @brief Begin iterator over all (phrase, Info) entries (DFS order).
   auto begin() const -> const_iterator;
 
+  /// @brief Past-the-end iterator.
   auto end() const -> const_iterator;
 
+  /// @brief Get a UserTrie handle for inserting user-defined words.
   auto user() -> UserTrie;
 
  private:
@@ -77,6 +104,7 @@ class Trie {
   std::unordered_set<char32_t> user_char_;
 };
 
+/// @brief DFS const_iterator over all (phrase, Info*) pairs in the trie.
 class Trie::const_iterator {
   using citer = std::unordered_map<char32_t, Node>::const_iterator;
 
@@ -110,6 +138,11 @@ class Trie::const_iterator {
   std::vector<std::pair<citer, citer>> path_;
 };
 
+/// @brief Handle for loading user-defined dictionary entries into a Trie.
+///
+/// Acquired via Trie::user(). Loading via `std::ifstream >> trie.user()` marks
+/// the first character of each entry so that MixSegment does not apply HMM
+/// segmentation to those positions.
 class UserTrie {
   friend Trie;
   friend auto operator>>(std::istream &is, UserTrie &&trie) -> std::istream &;

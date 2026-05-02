@@ -1,3 +1,6 @@
+/// @file mix.cc
+/// @brief MixSegment and mix() implementation: hybrid dictionary + HMM segmentation.
+
 #include "algo/mix.hh"
 
 #include <cstddef>
@@ -19,6 +22,11 @@ auto MixSegment::operator()(std::u32string_view str) const -> std::vector<std::u
   return mix(str, segments, hmm_, trie_);
 }
 
+/// @brief Merge dictionary segments with HMM-decoded unknown spans.
+///
+/// Walks through the mp() segments. Multi-character segments and positions covered by
+/// user-dictionary entries are kept as-is. Contiguous single-character unknown spans
+/// are passed to HMMSegment for Viterbi-based segmentation.
 auto mix(std::u32string_view str, const Segments &segs, const HMModel &model, const Trie &trie)
     -> std::vector<std::u32string_view> {
   const HMMSegment hmm(model);

@@ -1,3 +1,6 @@
+/// @file pre_segment.hh
+/// @brief Pre-segmentation: splits UTF-32 text on delimiter characters before segmentation.
+
 #pragma once
 
 #include <cstddef>
@@ -7,6 +10,10 @@
 
 namespace ccjieba {
 
+/// @brief A view over a sentence split by delimiter characters.
+///
+/// Created by PreSegmenter::operator() and iterated via const_iterator.
+/// Each dereference yields the next non-delimiter substring.
 class PreSegment {
   std::u32string symbols_;
   std::u32string_view sentence_;
@@ -30,12 +37,14 @@ class PreSegment {
     using pointer = value_type *;
     using reference = value_type &;
 
+    /// @brief The current non-delimiter substring.
     auto operator*() const -> value_type;
 
     auto operator==(const const_iterator &other) const -> bool;
 
     auto operator!=(const const_iterator &other) const -> bool;
 
+    /// @brief Advance to the next non-delimiter substring.
     auto operator++() -> const_iterator &;
 
     auto operator++(int) -> const_iterator;
@@ -49,12 +58,21 @@ class PreSegment {
   auto end() const -> const_iterator;
 };
 
+/// @brief Functor that splits sentences on a configured set of delimiter characters.
+///
+/// The split is performed lazily via the returned PreSegment iterator.
+/// Default delimiters in practice are space, tab, comma, and Chinese full stop (。).
 class PreSegmenter {
   std::u32string symbols_;
 
  public:
+  /// @param symbols The set of delimiter characters (UTF-32).
   PreSegmenter(std::u32string symbols);
+
+  /// @brief Create an iterable PreSegment view over @p sentence.
   auto operator()(std::u32string_view sentence) const -> PreSegment;
+
+  /// @brief Replace the delimiter set.
   auto reset(std::u32string symbols) -> void;
 };
 

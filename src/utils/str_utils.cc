@@ -1,3 +1,6 @@
+/// @file str_utils.cc
+/// @brief UTF-8/UTF-32 codec implementation: manual encoding without libiconv.
+
 #include "utils/str_utils.hh"
 
 #include <cstddef>
@@ -6,6 +9,10 @@
 
 namespace ccjieba {
 
+/// @brief Decode UTF-8 to UTF-32.
+///
+/// Handles 1–4 byte sequences. Returns false on invalid lead bytes,
+/// truncated sequences, or missing continuation bytes (which must match 10xxxxxx).
 auto utf8_to_utf32(std::string_view str, std::u32string &ret) -> bool {
   size_t size = str.size();
   ret.clear();
@@ -45,6 +52,10 @@ auto utf8_to_utf32(std::string_view str, std::u32string &ret) -> bool {
   return true;
 }
 
+/// @brief Encode UTF-32 to UTF-8.
+///
+/// Produces 1–4 byte sequences based on code point range.
+/// Code points above U+10FFFF are silently ignored (not appended).
 auto utf32_to_utf8(std::u32string_view str, std::string &ret) -> bool {
   size_t size = str.size();
   ret.clear();

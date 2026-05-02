@@ -1,3 +1,6 @@
+/// @file io.cc
+/// @brief Out-of-line bostream/bistream operator<< and operator>> implementations for all primitive types.
+
 #include "utils/io.hh"
 
 #include <cstddef>
@@ -70,6 +73,7 @@ auto operator<<(bostream &os, char32_t value) -> bostream & {
   return os.dump(reinterpret_cast<const std::byte *>(&value), sizeof(value));
 }
 
+/// @brief Serialize a C-string (length-prefixed, no null terminator).
 auto operator<<(bostream &os, const char *value) -> bostream & {
   size_t size = strlen(value);
   os << size;

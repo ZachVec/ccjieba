@@ -1,3 +1,6 @@
+/// @file full.cc
+/// @brief FullSegment implementation: returns all dictionary words found in the input.
+
 #include "algo/full.hh"
 
 #include <algorithm>
@@ -12,6 +15,10 @@ namespace ccjieba {
 
 FullSegment::FullSegment(const Trie &trie, size_t max_word_length) : trie_(trie), max_word_length_(max_word_length) {}
 
+/// @brief Extract every dictionary word of length >= 2 from the DAG.
+///
+/// For positions with exactly one single-character edge (no multi-character word starts here),
+/// emits the single character. This ensures complete coverage of the input.
 auto FullSegment::operator()(std::u32string_view str) const -> std::vector<std::u32string_view> {
   const DiGraph<const Info *> &graph = trie_.search(str, max_word_length_);
 

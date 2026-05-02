@@ -1,3 +1,6 @@
+/// @file stop_words.cc
+/// @brief StopWordsDictionary implementation: membership test and I/O.
+
 #include "index/stop_words.hh"
 
 #include <istream>
@@ -9,6 +12,7 @@
 
 namespace ccjieba {
 
+/// @brief Membership test via manual bucket walk for heterogeneous string_view key.
 auto StopWordsDictionary::operator[](std::string_view str) const -> bool {
   decltype(stop_words_)::key_equal key_eq = stop_words_.key_eq();
   auto bucket_id = stop_words_.hash_function()(str) % stop_words_.bucket_count();
@@ -20,6 +24,7 @@ auto StopWordsDictionary::operator[](std::string_view str) const -> bool {
   return false;
 }
 
+/// @brief Load stop words from text: one word per line.
 auto operator>>(std::istream &is, StopWordsDictionary &stop_words) -> std::istream & {
   std::string line;
   while (std::getline(is, line)) {
@@ -28,6 +33,7 @@ auto operator>>(std::istream &is, StopWordsDictionary &stop_words) -> std::istre
   return is;
 }
 
+/// @brief Binary deserialization: reads words until EOF (no explicit size prefix).
 auto operator>>(bistream &is, StopWordsDictionary &stop_words) -> bistream & {
   std::string term;
   while (is >> term) {
@@ -36,6 +42,7 @@ auto operator>>(bistream &is, StopWordsDictionary &stop_words) -> bistream & {
   return is;
 }
 
+/// @brief Binary serialization: writes each term sequentially.
 auto operator<<(bostream &os, const StopWordsDictionary &stop_words) -> bostream & {
   for (const auto &term : stop_words.stop_words_) {
     os << term;

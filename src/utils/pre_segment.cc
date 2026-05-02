@@ -1,3 +1,6 @@
+/// @file pre_segment.cc
+/// @brief PreSegmenter implementation: lazy sentence splitting on delimiter characters.
+
 #include "utils/pre_segment.hh"
 
 #include <cstddef>
@@ -7,6 +10,10 @@
 
 namespace ccjieba {
 
+/// @brief Construct an iterator starting at position u.
+///
+/// Finds the first delimiter at or after u. If the current character is itself
+/// a delimiter (u == v), skips it by advancing v by 1.
 PreSegment::const_iterator::const_iterator(size_t u, std::u32string_view symbols, std::u32string_view sentence)
   : u_(u), v_(sentence.find_first_of(symbols, u)), symbols_(symbols), sentence_(sentence) {
   if (u_ == v_) {
@@ -26,6 +33,10 @@ auto PreSegment::const_iterator::operator!=(const const_iterator &other) const -
   return !(*this == other);
 }
 
+/// @brief Advance to the next non-delimiter substring.
+///
+/// Sets u_ to the current delimiter position (v_), then scans forward
+/// for the next delimiter or end-of-string.
 auto PreSegment::const_iterator::operator++() -> const_iterator & {
   if (u_ >= sentence_.size()) {
     return *this;
@@ -58,6 +69,7 @@ auto PreSegment::end() const -> const_iterator {
 
 PreSegmenter::PreSegmenter(std::u32string symbols) : symbols_(std::move(symbols)) {}
 
+/// @brief Create a PreSegment view for lazy iteration.
 auto PreSegmenter::operator()(std::u32string_view sentence) const -> PreSegment {
   return PreSegment(symbols_, sentence);
 }

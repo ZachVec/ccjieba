@@ -1,3 +1,6 @@
+/// @file mp.cc
+/// @brief MPSegment and mp() implementation: max-probability segmentation via reverse DP on the trie DAG.
+
 #include "algo/mp.hh"
 
 #include <cstddef>
@@ -24,6 +27,11 @@ auto MPSegment::operator()(std::u32string_view str) const -> std::vector<std::u3
   return ret;
 }
 
+/// @brief Reverse DP over the DAG to find the max-probability path.
+///
+/// Processes nodes from right to left. For each position u, selects the edge (u, v)
+/// that maximizes info->weight + best_weight[v+1]. Single characters with no dictionary
+/// entry use min_weight as fallback.
 auto mp(const Graph &graph, double min_weight) -> Segments {
   const auto value = Segment(std::u32string_view::npos, -3.14e+100, nullptr);
   Segments segments(graph.size(), value);

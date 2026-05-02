@@ -1,3 +1,9 @@
+/// @file demo.cc
+/// @brief Demonstration program exercising all ccjieba features: segmentation, user dict, extraction, tagging.
+///
+/// Build: `cmake --build build && ./build/bin/demo`
+/// Requires index files under the path specified by the DATA_ROOT compile-time define.
+
 #include <array>
 #include <fstream>
 #include <iomanip>
@@ -22,6 +28,7 @@ auto operator<<(std::ostream &os, const std::pair<std::string, std::string_view>
   return os << '\"' << tag.first << ':' << tag.second << '\"';
 }
 
+/// @brief Format helper for aligned section titles in demo output.
 struct title {  // NOLINT(readability-identifier-naming)
   std::string_view str;
   int length;
@@ -30,6 +37,7 @@ struct title {  // NOLINT(readability-identifier-naming)
   }
 };
 
+/// @brief Join a vector of values with configurable delimiters for pretty-printing.
 template <typename T>
 struct join {  // NOLINT(readability-identifier-naming)
   std::string_view leading_chars_;
@@ -52,6 +60,7 @@ struct join {  // NOLINT(readability-identifier-naming)
   }
 };
 
+/// @brief Pipe operator to create a join from a vector.
 template <typename T>
 auto operator|(std::vector<T> values, std::array<std::string_view, 3> chars) -> join<T> {
   return join<T>(chars[0], chars[1], chars[2], std::move(values));
@@ -59,6 +68,7 @@ auto operator|(std::vector<T> values, std::array<std::string_view, 3> chars) -> 
 
 }  // namespace
 
+/// @brief Run all segmentation algorithms, user dict, keyword extraction, and POS tagging demos.
 auto main() -> int {
   ccjieba::Jieba jieba;
   if ((std::ifstream(DATA_ROOT "/jieba.dict.utf8") >> jieba.trie_).bad()) {
@@ -92,6 +102,7 @@ auto main() -> int {
     std::cout << title{"QuerySegment"sv, 20} << (jieba.cut<ccjieba::QuerySegment>(sentence) | chars) << std::endl;
   }
 
+  /// Demonstrate user-dictionary effect: "云计算" is segmented differently after adding user dict.
   std::string_view s = "令狐冲是云计算行业的专家"sv;
   std::cout << title{"Before User Dict", 20} << (jieba.cut(s) | chars) << std::endl;
   if ((std::ifstream(TEST_DATA_ROOT "/user.dict.utf8") >> jieba.trie_.user()).bad()) {

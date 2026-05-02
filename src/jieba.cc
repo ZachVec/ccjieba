@@ -1,3 +1,5 @@
+/// @file jieba.cc
+/// @brief Jieba facade implementation: template instantiation, segmentation, extraction, and tagging pipelines.
 
 #include "jieba.hh"
 
@@ -24,6 +26,10 @@
 
 namespace ccjieba {
 
+/// @brief Dispatch cut() to the correct segmenter based on Algo type.
+///
+/// Pre-segments the input on delimiters (space, tab, comma, Chinese full stop),
+/// segments each piece, and converts results back to UTF-8.
 template <typename Algo>
 auto Jieba::cut(std::string_view str, std::optional<size_t> max_word_length) const -> std::vector<std::string> {
   std::u32string sentence;
@@ -58,10 +64,12 @@ auto Jieba::cut(std::string_view str, std::optional<size_t> max_word_length) con
   return ret;
 }
 
+/// @brief Extract top-N keywords via MixSegment + KeywordExtractor.
 auto Jieba::extract(std::string_view str, size_t top_n) const -> std::vector<Keyword> {
   return KeywordExtractor(idf_, stop_words_)(cut<MixSegment>(str), top_n);
 }
 
+/// @brief Tag a single word: first try dictionary lookup, then heuristic classification.
 auto Jieba::tag_word(std::string_view str) const -> std::string_view {
   std::u32string encoded;
   if (not utf8_to_utf32(str, encoded)) {
@@ -74,6 +82,7 @@ auto Jieba::tag_word(std::string_view str) const -> std::string_view {
   return Tagger::classify_unknown_word(encoded);
 }
 
+/// @brief Segment and tag an entire sentence via Tagger.
 auto Jieba::tag_sentence(std::string_view str) const -> std::vector<std::pair<std::string, std::string_view>> {
   std::u32string sentence;
   if (not utf8_to_utf32(str, sentence)) {
@@ -94,6 +103,7 @@ auto Jieba::tag_sentence(std::string_view str) const -> std::vector<std::pair<st
   return tags;
 }
 
+// Explicit template instantiation for all supported segmenter types.
 template std::vector<std::string> Jieba::cut<MPSegment>(std::string_view, std::optional<size_t>) const;
 template std::vector<std::string> Jieba::cut<FullSegment>(std::string_view, std::optional<size_t>) const;
 template std::vector<std::string> Jieba::cut<HMMSegment>(std::string_view, std::optional<size_t>) const;

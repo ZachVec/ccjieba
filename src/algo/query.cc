@@ -1,3 +1,6 @@
+/// @file query.cc
+/// @brief QuerySegment implementation: MixSegment + sub-segmentation at configurable lengths.
+
 #include "algo/query.hh"
 
 #include <algorithm>
@@ -17,6 +20,11 @@ QuerySegment::QuerySegment(const HMModel &model, const Trie &trie, size_t max_wo
   std::sort(lengths_.begin(), lengths_.end());
 }
 
+/// @brief Segment with sub-segmentation for query recall.
+///
+/// After running MixSegment, for each output word also emits dictionary substrings of
+/// the configured lengths from the trie DAG. This ensures search queries can match
+/// at both the full-word and character-n-gram level.
 auto QuerySegment::operator()(std::u32string_view str) const -> std::vector<std::u32string_view> {
   const Graph graph = trie_.search(str, max_word_length_);
   std::vector<std::u32string_view> segments = mix(str, mp(graph, trie_.minimum_weight()), hmm_, trie_);

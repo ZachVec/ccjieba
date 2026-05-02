@@ -1,3 +1,6 @@
+/// @file hmm.cc
+/// @brief HMMSegment implementation: segments unknown-word runs using the Viterbi decoder.
+
 #include "algo/hmm.hh"
 
 #include <cctype>
@@ -11,6 +14,11 @@ namespace ccjieba {
 
 HMMSegment::HMMSegment(const HMModel &model) : viterbi_(model) {}
 
+/// @brief Segment a string by separating ASCII/alphanumeric spans and Viterbi-decoding CJK runs.
+///
+/// ASCII/alphanumeric characters (including an optional trailing decimal like ".14")
+/// are emitted as single tokens because they are already word-delimited.
+/// Contiguous CJK-character spans (U+0080 and above) are passed to the Viterbi decoder.
 auto HMMSegment::operator()(std::u32string_view str) const -> std::vector<std::u32string_view> {
   size_t u = 0;
   size_t v = 0;

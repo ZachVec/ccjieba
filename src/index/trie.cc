@@ -1,3 +1,6 @@
+/// @file trie.cc
+/// @brief Trie implementation: upsert, match, search, I/O, and DFS const_iterator.
+
 #include "index/trie.hh"
 
 #include <algorithm>
@@ -25,6 +28,10 @@ using std::operator""sv;
 
 namespace ccjieba {
 
+/// @brief Insert or update a phrase in the trie.
+///
+/// Walks the trie path for the phrase, creating missing nodes along the way,
+/// and sets the Info at the final node. Returns a pointer to the stored Info.
 auto Trie::upsert(std::u32string_view phrase, Info info) -> Info * {
   size_t length = phrase.size();
   if (length == 0) {
@@ -43,6 +50,9 @@ auto Trie::upsert(std::u32string_view phrase, Info info) -> Info * {
   return it->second.info.get();
 }
 
+/// @brief Exact prefix match: walk the trie following @p str characters.
+///
+/// Returns the last non-null Info encountered, or nullptr if the path is not in the trie.
 auto Trie::match(std::u32string_view str) const -> const Info * {
   Info *info = nullptr;
   const std::unordered_map<char32_t, Node> *next = &root_;
@@ -60,6 +70,10 @@ auto Trie::match(std::u32string_view str) const -> const Info * {
   return info;
 }
 
+/// @brief Build a DAG of all dictionary matches for every starting position.
+///
+/// For each position i, follows the trie path up to max_len characters and adds
+/// an edge (i, j) for each node that has a non-null Info.
 auto Trie::search(std::u32string_view str, size_t max_len) const -> Graph {
   size_t size = str.size();
 
@@ -106,6 +120,10 @@ auto Trie::user() -> UserTrie {
   return UserTrie(*this);
 }
 
+/// @brief Load dictionary from text format: one entry per line as "phrase freq tag".
+///
+/// Frequencies are log-transformed relative to total_frequence_ so that
+/// path probabilities can be summed in the Viterbi and DP algorithms.
 auto operator>>(std::istream &is, Trie &trie) -> std::istream & {
   size_t total_freq = 0;
   size_t min_freq = std::numeric_limits<size_t>::max();
@@ -153,6 +171,7 @@ auto operator>>(std::istream &is, Trie &trie) -> std::istream & {
   return is;
 }
 
+/// @brief Binary-serialise the trie: total freq, min/max weight, then each (phrase, weight, tag).
 auto operator<<(bostream &os, const Trie &trie) -> bostream & {
   os << trie.total_frequence_ << trie.minimum_weight_ << trie.maximum_weight_;
   for (const auto &[phrase, info] : trie) {
@@ -161,6 +180,7 @@ auto operator<<(bostream &os, const Trie &trie) -> bostream & {
   return os;
 }
 
+/// @brief Binary-deserialise the trie with pre-computed log weights.
 auto operator>>(bistream &is, Trie &trie) -> bistream & {
   if (not(is >> trie.total_frequence_ >> trie.minimum_weight_ >> trie.maximum_weight_)) {
     return is;
@@ -179,6 +199,7 @@ Trie::const_iterator::const_iterator(const std::unordered_map<char32_t, Node> &r
   advance();
 }
 
+/// @brief Advance to the next node carrying a non-null Info, using DFS.
 void Trie::const_iterator::advance() {
   while (not path_.empty()) {
     auto &[it, end] = path_.back();
@@ -221,6 +242,11 @@ auto Trie::const_iterator::operator++() -> const_iterator & {
   return *this;
 }
 
+/// @brief Load user dictionary from text format.
+///
+/// Supports 1, 2, or 3 columns: "phrase", "phrase tag", or "phrase freq tag".
+/// Marks the first character of each entry in user_char_ so that MixSegment
+/// preserves these positions instead of applying HMM.
 auto operator>>(std::istream &is, UserTrie &&trie) -> std::istream & {
   for (std::string line; std::getline(is, line);) {
     std::string_view view = strip(std::string_view(line), " \n"sv);

@@ -1,3 +1,6 @@
+/// @file idf.cc
+/// @brief InverseDocumentFrequence implementation: lookup and I/O.
+
 #include "index/idf.hh"
 
 #include <cstddef>
@@ -15,6 +18,10 @@ using std::operator""sv;
 
 namespace ccjieba {
 
+/// @brief Look up IDF score by manual bucket walk for heterogeneous string_view key.
+///
+/// Uses the transparent hasher and equality to find the bucket, then walks entries.
+/// Returns the average IDF if the token is not found.
 auto InverseDocumentFrequence::operator[](std::string_view str) const -> double {
   auto key_eq = idf_.key_eq();
   size_t bucket_id = idf_.hash_function()(str) % idf_.bucket_count();
@@ -26,6 +33,9 @@ auto InverseDocumentFrequence::operator[](std::string_view str) const -> double 
   return average_;
 }
 
+/// @brief Load IDF from text format: one entry per line as "word freq".
+///
+/// Computes the average IDF across all entries for fallback on unknown tokens.
 auto operator>>(std::istream &is, InverseDocumentFrequence &holder) -> std::istream & {
   std::string line;
   double total = 0.0;
@@ -56,6 +66,7 @@ auto operator>>(std::istream &is, InverseDocumentFrequence &holder) -> std::istr
   return is;
 }
 
+/// @brief Binary deserialization: read count and average, then entries.
 auto operator>>(bistream &is, InverseDocumentFrequence &holder) -> bistream & {
   size_t size;
   if (not(is >> size >> holder.average_)) {
@@ -70,6 +81,7 @@ auto operator>>(bistream &is, InverseDocumentFrequence &holder) -> bistream & {
   return is;
 }
 
+/// @brief Binary serialization: element count, average, then word-freq pairs.
 auto operator<<(bostream &os, const InverseDocumentFrequence &holder) -> bostream & {
   os << holder.idf_.size() << holder.average_;
   for (const auto &[k, v] : holder.idf_) {

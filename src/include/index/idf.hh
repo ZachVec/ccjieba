@@ -1,3 +1,6 @@
+/// @file idf.hh
+/// @brief Inverse Document Frequency index for keyword extraction scoring.
+
 #pragma once
 
 #include <functional>
@@ -10,6 +13,10 @@
 
 namespace ccjieba {
 
+/// @brief Inverse Document Frequency lookup table.
+///
+/// Maps tokens to IDF scores. Unknown tokens fall back to the average IDF across all entries.
+/// Uses heterogeneous hash/equality for `string_view` lookup without allocation.
 class InverseDocumentFrequence {
   double average_;
   std::unordered_map<std::string, double, std::hash<std::string_view>, std::equal_to<>> idf_;
@@ -18,6 +25,9 @@ class InverseDocumentFrequence {
   friend auto operator<<(bostream &os, const InverseDocumentFrequence &idf) -> bostream &;
 
  public:
+  /// @brief Look up IDF score for a token.
+  /// @param str The token to look up.
+  /// @return IDF score, or the average IDF if the token is unknown.
   auto operator[](std::string_view str) const -> double;
 };
 

@@ -1,3 +1,6 @@
+/// @file io.hh
+/// @brief Binary I/O streams for compact, portable index serialization.
+
 #pragma once
 
 #include <cstddef>
@@ -8,6 +11,10 @@
 
 namespace ccjieba {
 
+/// @brief Write-only binary output stream backed by a contiguous byte buffer.
+///
+/// Serializes primitives and strings via `operator<<` chaining. Strings are length-prefixed.
+/// No alignment or endianness handling — intended for same-platform persistence.
 class bostream {  // NOLINT(readability-identifier-naming)
   std::vector<std::byte> buffer_;
 
@@ -16,10 +23,13 @@ class bostream {  // NOLINT(readability-identifier-naming)
 
   auto reserve(size_t n) -> void { buffer_.reserve(n); }
 
+  /// @brief Pointer to the underlying buffer.
   inline auto data() const -> const std::byte * { return buffer_.data(); }
 
+  /// @brief Current buffer size in bytes.
   inline auto size() const -> size_t { return buffer_.size(); }
 
+  /// @brief Append raw bytes to the buffer.
   inline auto dump(const std::byte *data, size_t n) -> bostream & {
     size_t prev = buffer_.size();
     buffer_.resize(prev + n);
@@ -45,6 +55,7 @@ class bostream {  // NOLINT(readability-identifier-naming)
   friend auto operator<<(bostream &os, char32_t value) -> bostream &;
   friend auto operator<<(bostream &os, const char *value) -> bostream &;
 
+  /// @brief Serialize a string (size-prefixed, followed by raw character data).
   template <typename CharT, typename Traits = std::char_traits<CharT>, typename Alloc = std::allocator<CharT>>
   friend auto operator<<(bostream &os, const std::basic_string<CharT, Traits, Alloc> &value) -> bostream & {
     const auto *data = reinterpret_cast<const std::byte *>(value.data());
@@ -53,6 +64,11 @@ class bostream {  // NOLINT(readability-identifier-naming)
   }
 };
 
+/// @brief Read-only binary input stream with cursor over a byte span.
+///
+/// Deserializes via `operator>>` chaining. Reads are unchecked after the buffer boundary
+/// (the caller should use `operator bool()` to verify). String reads first extract the size,
+/// then resize and copy.
 class bistream {  // NOLINT(readability-identifier-naming)
   const std::byte *data_;
   const size_t size_;
@@ -61,17 +77,22 @@ class bistream {  // NOLINT(readability-identifier-naming)
  public:
   bistream(const std::byte *data, size_t n) : data_(data), size_(n), cursor_(0) {}
 
+  /// @brief True while the cursor has not advanced past the buffer end.
   inline operator bool() const { return cursor_ <= size_; }
 
+  /// @brief Pointer to current cursor position.
   inline auto data() const -> const std::byte * { return &data_[cursor_]; }
 
+  /// @brief Remaining bytes in the buffer.
   inline auto size() const -> size_t { return size_ - cursor_; }
 
+  /// @brief Advance the cursor by @p n bytes.
   inline auto step(size_t n) -> bistream & {
     cursor_ += n;
     return *this;
   }
 
+  /// @brief Copy @p size bytes from the cursor into @p data, then advance.
   inline auto read(std::byte *data, size_t size) -> bistream & {
     if (size_ >= cursor_ + size) {
       std::memmove(data, this->data(), size);
@@ -96,6 +117,7 @@ class bistream {  // NOLINT(readability-identifier-naming)
   friend auto operator>>(bistream &is, unsigned char &value) -> bistream &;
   friend auto operator>>(bistream &is, char32_t &value) -> bistream &;
 
+  /// @brief Deserialize a string: read size, resize, then copy character data.
   template <typename CharT, typename Traits = std::char_traits<CharT>, typename Alloc = std::allocator<CharT>>
   friend auto operator>>(bistream &is, std::basic_string<CharT, Traits, Alloc> &value) -> bistream & {
     size_t size;

@@ -1,3 +1,6 @@
+/// @file tagger.cc
+/// @brief Tagger implementation: MixSegment-based segmentation with dictionary POS tag lookup.
+
 #include "algo/tagger.hh"
 
 #include <algorithm>
@@ -11,6 +14,7 @@
 
 namespace ccjieba {
 
+/// @brief Comparison helper for binary-searching graph edges by target index.
 static auto comp(const Edge &a, const Edge &b) -> bool {
   return a.first < b.first;
 }
@@ -18,6 +22,11 @@ static auto comp(const Edge &a, const Edge &b) -> bool {
 Tagger::Tagger(const HMModel &hmm, const Trie &trie, size_t max_word_length)
   : hmm_(hmm), trie_(trie), max_word_length_(max_word_length) {}
 
+/// @brief Segment the input then look up each word's tag in the trie DAG.
+///
+/// For each word produced by MixSegment, binary-searches the DAG edges at its starting
+/// position. If an exact match is found, uses the dictionary tag; otherwise falls back
+/// to classify_unknown_word().
 auto Tagger::operator()(std::u32string_view str) const
     -> std::vector<std::pair<std::u32string_view, std::string_view>> {
   auto graph = trie_.search(str, max_word_length_);

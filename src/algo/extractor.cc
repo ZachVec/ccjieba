@@ -1,3 +1,6 @@
+/// @file extractor.cc
+/// @brief KeywordExtractor implementation: TF-IDF scoring with stop-word filtering.
+
 #include "algo/extractor.hh"
 
 #include <algorithm>
@@ -14,6 +17,10 @@
 
 namespace {
 
+/// @brief Test whether a UTF-8 string is a single character.
+///
+/// Determines this by checking if the byte length of the first UTF-8 code point
+/// equals the total string length (no multi-character words passed through).
 inline auto is_one_letter_word(std::string_view str) -> bool {
   auto c = static_cast<unsigned char>(str.front());
   if (c < 0x80) {
@@ -30,6 +37,11 @@ inline auto is_one_letter_word(std::string_view str) -> bool {
 
 namespace ccjieba {
 
+/// @brief Count term frequencies, multiply by IDF, filter, and return top N.
+///
+/// Single-character words and stop-words are excluded. Terms are scored by
+/// `term_frequency * idf[term]` and the top @p top_n are returned sorted
+/// by descending weight.
 auto KeywordExtractor::operator()(const std::vector<std::string> &segments, size_t top_n) const
     -> std::vector<Keyword> {
   std::unordered_map<std::string_view, std::tuple<size_t, std::vector<size_t>>> keywords;

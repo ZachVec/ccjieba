@@ -1,3 +1,10 @@
+/// @file viterbi.hh
+/// @brief Generic Viterbi decoder template for HMM-based sequence labeling.
+///
+/// The model type must satisfy a compile-time contract verified via static_assert:
+/// - `operator()(u32string_view)` returns a context with `pstart`, `ptrans`, `pemits`, `is_end`.
+/// - Static members `LOWEST`, `NSTATE`, `DSTATE`.
+
 #pragma once
 
 #include <algorithm>
@@ -10,6 +17,14 @@
 
 namespace ccjieba {
 
+/// @brief Generic Viterbi decoder over a 4-state HMM (B/E/M/S).
+///
+/// Implements the classic Viterbi algorithm with two-row probability buffer and
+/// back-pointer matrix. End states are identified by the model's `is_end()` predicate
+/// (odd-index states: E=1, S=3). The output is a sequence of non-overlapping substrings.
+///
+/// @tparam ModelT Model type providing NSTATE, DSTATE, LOWEST, and a call operator
+///               returning a Context with pstart/ptrans/pemits/is_end.
 template <typename ModelT>
 class Viterbi {
   using mcontext = decltype(std::declval<const ModelT>()(std::declval<std::u32string_view>()));
@@ -35,6 +50,9 @@ class Viterbi {
   Viterbi() = delete;
   explicit Viterbi(const ModelT &model) : model_(model) {}
 
+  /// @brief Decode the most likely state sequence and return segmented substrings.
+  /// @param str The input u32string to segment.
+  /// @return Non-overlapping u32string_views for each decoded word.
   auto operator()(std::u32string_view str) const -> std::vector<std::u32string_view> {
     if (str.empty()) {
       return {};
