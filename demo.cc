@@ -5,6 +5,7 @@
 /// Requires index files under the path specified by the DATA_ROOT compile-time define.
 
 #include <array>
+#include <cstddef>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -72,19 +73,19 @@ auto operator|(std::vector<T> values, std::array<std::string_view, 3> chars) -> 
 auto main() -> int {
   ccjieba::Jieba jieba;
   if ((std::ifstream(DATA_ROOT "/jieba.dict.utf8") >> jieba.trie_).bad()) {
-    std::cout << "Failed to read jieba.dict.utf8" << std::endl;
+    std::cout << "Failed to read jieba.dict.utf8" << '\n';
     return 1;
   }
   if ((std::ifstream(DATA_ROOT "/hmm_model.utf8") >> jieba.hmm_).bad()) {
-    std::cout << "Failed to read hmm_model.utf8" << std::endl;
+    std::cout << "Failed to read hmm_model.utf8" << '\n';
     return 1;
   }
   if ((std::ifstream(DATA_ROOT "/idf.utf8") >> jieba.idf_).bad()) {
-    std::cout << "Failed to read idf.utf8" << std::endl;
+    std::cout << "Failed to read idf.utf8" << '\n';
     return 1;
   }
   if ((std::ifstream(DATA_ROOT "/stop_words.utf8") >> jieba.stop_words_).bad()) {
-    std::cout << "Failed to read stop_words.utf8" << std::endl;
+    std::cout << "Failed to read stop_words.utf8" << '\n';
     return 1;
   }
   std::vector<std::string> sentences{"我来到北京清华大学",
@@ -94,29 +95,29 @@ auto main() -> int {
 
   std::array<std::string_view, 3> chars{""sv, ""sv, "/"sv};
   for (const auto &sentence : sentences) {
-    std::cout << title{"Orignal"sv, 20} << sentence << std::endl;
-    std::cout << title{"MPSegment"sv, 20} << (jieba.cut<ccjieba::MPSegment>(sentence) | chars) << std::endl;
-    std::cout << title{"HMMSegment"sv, 20} << (jieba.cut<ccjieba::HMMSegment>(sentence) | chars) << std::endl;
-    std::cout << title{"MixSegment"sv, 20} << (jieba.cut<ccjieba::MixSegment>(sentence) | chars) << std::endl;
-    std::cout << title{"FullSegment"sv, 20} << (jieba.cut<ccjieba::FullSegment>(sentence) | chars) << std::endl;
-    std::cout << title{"QuerySegment"sv, 20} << (jieba.cut<ccjieba::QuerySegment>(sentence) | chars) << std::endl;
+    std::cout << title{"Orignal"sv, 20} << sentence << '\n';
+    std::cout << title{"MPSegment"sv, 20} << (jieba.cut<ccjieba::MPSegment>(sentence) | chars) << '\n';
+    std::cout << title{"HMMSegment"sv, 20} << (jieba.cut<ccjieba::HMMSegment>(sentence) | chars) << '\n';
+    std::cout << title{"MixSegment"sv, 20} << (jieba.cut<ccjieba::MixSegment>(sentence) | chars) << '\n';
+    std::cout << title{"FullSegment"sv, 20} << (jieba.cut<ccjieba::FullSegment>(sentence) | chars) << '\n';
+    std::cout << title{"QuerySegment"sv, 20} << (jieba.cut<ccjieba::QuerySegment>(sentence) | chars) << '\n';
   }
 
   /// Demonstrate user-dictionary effect: "云计算" is segmented differently after adding user dict.
   std::string_view s = "令狐冲是云计算行业的专家"sv;
-  std::cout << title{"Before User Dict", 20} << (jieba.cut(s) | chars) << std::endl;
+  std::cout << title{"Before User Dict", 20} << (jieba.cut(s) | chars) << '\n';
   if ((std::ifstream(TEST_DATA_ROOT "/user.dict.utf8") >> jieba.trie_.user()).bad()) {
-    std::cout << "Failed to read user.dict.utf8" << std::endl;
+    std::cout << "Failed to read user.dict.utf8" << '\n';
     return 1;
   }
-  std::cout << title{"After User Dict", 20} << (jieba.cut(s) | chars) << std::endl;
+  std::cout << title{"After User Dict", 20} << (jieba.cut(s) | chars) << '\n';
 
   chars = {"["sv, "]"sv, ", "sv};
   s = "我是拖拉机学院手扶拖拉机专业的。不用多久，我就会升职加薪，当上CEO，走上人生巅峰。"sv;
-  std::cout << title{"Extraction", 20} << (jieba.extract(s, 5) | chars) << std::endl;
+  std::cout << title{"Extraction", 20} << (jieba.extract(s, 5) | chars) << '\n';
 
   s = "我是蓝翔技工拖拉机学院手扶拖拉机专业的。不用多久，我就会升职加薪，当上总经理，出任CEO，迎娶白富美，走上人生巅峰。"sv;
-  std::cout << title{"Tagging", 20} << (jieba.tag_sentence(s) | chars) << std::endl;
+  std::cout << title{"Tagging", 20} << (jieba.tag_sentence(s) | chars) << '\n';
 
   return 0;
 }
