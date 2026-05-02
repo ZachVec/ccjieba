@@ -37,3 +37,5 @@ Five segmenters: MPSegment (DP on Trie DAG), HMMSegment (Viterbi), MixSegment (d
 ### Code style
 
 Google-based, right-aligned pointers, 120-column limit, C++17. Trailing-return-type syntax. See `.clang-format`.
+
+Every file must directly include the header for every type and function it uses — no relying on transitive includes. `<cstddef>` for `size_t`, `<utility>` for `std::pair` / `std::move`, `<vector>` for `std::vector`, project headers like `keyword.hh` for `Keyword`, etc. clangd `MissingIncludes: Strict` enforces this.
