@@ -1,6 +1,6 @@
 # Summary
 
-- [Introduction](README.md)
+- [Introduction](introduction.md)
 - [Getting Started](getting-started.md)
 - [API Reference]()
   - [Jieba & Cut](api/jieba.md)
