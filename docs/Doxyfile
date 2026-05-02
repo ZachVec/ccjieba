@@ -1,12 +1,12 @@
 PROJECT_NAME           = "CcJieba"
 PROJECT_BRIEF          = "C++ Chinese text segmentation library"
 OUTPUT_DIRECTORY       = doxygen
-INPUT                  = ../src \
-                         ../include
+INPUT                  = ../src
 RECURSIVE              = YES
 FILE_PATTERNS          = *.hh *.cc *.h
 EXCLUDE_PATTERNS       = */tests/* */build/* */deps/*
-EXCLUDE                = ../src/index
+EXCLUDE                = ../src/index \
+                         ../src/algo/internal.hh
 
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
