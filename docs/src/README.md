@@ -1,4 +1,4 @@
-# CcJieba
+# ccjieba
 
 C++ Chinese text segmentation library, a refactored version inspired by [cppjieba](https://github.com/yanyiwu/cppjieba). C++17, zero external dependencies.
 

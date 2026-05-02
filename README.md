@@ -1,4 +1,4 @@
-# CcJieba
+# ccjieba
 
 C++ 中文分词库，受 [cppjieba](https://github.com/yanyiwu/cppjieba) 启发的重构版本。C++17，零外部依赖。
 

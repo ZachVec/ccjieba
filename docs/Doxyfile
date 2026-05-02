@@ -1,4 +1,4 @@
-PROJECT_NAME           = "CcJieba"
+PROJECT_NAME           = "ccjieba"
 PROJECT_BRIEF          = "C++ Chinese text segmentation library"
 OUTPUT_DIRECTORY       = doxygen
 INPUT                  = ../src
