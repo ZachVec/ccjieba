@@ -1,0 +1,44 @@
+#!/bin/bash
+# Pre-commit hook: clang-format + clang-tidy on staged C++ files.
+
+set -euo pipefail
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM -- '*.hh' '*.cc')
+if [ -z "$STAGED" ]; then
+  exit 0
+fi
+
+BUILD_DIR="build"
+
+# -------- clang-format (auto-fix, re-stage) --------
+STAGED_ARR=()
+while IFS= read -r f; do STAGED_ARR+=("$f"); done <<< "$STAGED"
+
+echo "==> clang-format on ${#STAGED_ARR[@]} staged files"
+clang-format -i "${STAGED_ARR[@]}"
+git add "${STAGED_ARR[@]}"
+
+# -------- clang-tidy (block on any warning/error) --------
+CC_FILES=()
+while IFS= read -r f; do
+  [[ "$f" == *.cc ]] && CC_FILES+=("$f")
+done <<< "$STAGED"
+
+if [ ${#CC_FILES[@]} -gt 0 ]; then
+  if [ ! -f "$BUILD_DIR/compile_commands.json" ]; then
+    cmake -B "$BUILD_DIR" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON >/dev/null
+  fi
+
+  echo "==> clang-tidy on ${#CC_FILES[@]} staged .cc files"
+  TIDY_OUT=$(clang-tidy -p "$BUILD_DIR" "${CC_FILES[@]}" 2>&1)
+  TIDY_RC=$?
+  # Strip boilerplate lines
+  TIDY_WARNINGS=$(echo "$TIDY_OUT" | grep -v "^Suppressed\|^$\|warnings generated\|Use -header" || true)
+  if [ -n "$TIDY_WARNINGS" ]; then
+    echo "$TIDY_WARNINGS"
+    echo "==> clang-tidy found warnings, commit aborted"
+    exit 1
+  fi
+fi
+
+echo "==> OK"

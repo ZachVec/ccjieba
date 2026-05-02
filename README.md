@@ -135,6 +135,24 @@ std::ifstream("user.dict.utf8") >> jieba.trie_.user();
 云计算
 ```
 
+## 提交前检查
+
+项目配置了 pre-commit hook，提交前自动运行 clang-format 和 clang-tidy：
+
+```bash
+# 克隆后启用
+ln -sf ../../scripts/pre-commit .git/hooks/pre-commit
+```
+
+- **clang-format** — 自动格式化暂存的文件并重新暂存
+- **clang-tidy** — 检查暂存的 `.cc` 文件，有警告时阻止提交
+
+需要 `compile_commands.json` 时 hook 会自动生成，也可手动提前生成以加速首次提交：
+
+```bash
+cmake -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+```
+
 ## 数据文件格式
 
 **词典** (`jieba.dict.utf8`) — `词语 词频 词性`，每行一条：
